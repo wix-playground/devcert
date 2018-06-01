@@ -1,27 +1,27 @@
-import path from 'path';
-import {
-  unlinkSync as rm,
-  readFileSync as readFile,
-  writeFileSync as writeFile,
-  existsSync as exists
-} from 'fs';
-import { sync as rimraf } from 'rimraf';
 import createDebug from 'debug';
+import {
+  existsSync as exists,
+  readFileSync as readFile,
+  unlinkSync as rm,
+  writeFileSync as writeFile
+} from 'fs';
+import path from 'path';
+import { sync as rimraf } from 'rimraf';
+import { generateKey } from './certificates';
 
 import {
-  rootCAKeyPath,
-  rootCACertPath,
   caSelfSignConfig,
-  opensslSerialFilePath,
-  opensslDatabaseFilePath,
-  isWindows,
+  caVersionFile,
   isLinux,
-  caVersionFile
+  isWindows,
+  opensslDatabaseFilePath,
+  opensslSerialFilePath,
+  rootCACertPath,
+  rootCAKeyPath
 } from './constants';
-import currentPlatform from './platforms';
-import { openssl, mktmp } from './utils';
-import { generateKey } from './certificates';
 import { Options } from './index';
+import currentPlatform from './platforms';
+import { mktmp, openssl } from './utils';
 
 const debug = createDebug('devcert:certificate-authority');
 
@@ -29,7 +29,10 @@ const debug = createDebug('devcert:certificate-authority');
  * Install the once-per-machine trusted root CA. We'll use this CA to sign
  * per-app certs.
  */
-export default async function installCertificateAuthority(options: Options = {}): Promise<void> {
+export default async function installCertificateAuthority(
+  options: Options = {}
+): Promise<void> {
+  const { password } = options;
   debug(`Checking if older devcert install is present`);
   scrubOldInsecureVersions();
 
@@ -37,18 +40,22 @@ export default async function installCertificateAuthority(options: Options = {})
   let rootKeyPath = mktmp();
   let rootCertPath = mktmp();
 
-  debug(`Generating the OpenSSL configuration needed to setup the certificate authority`);
+  debug(
+    `Generating the OpenSSL configuration needed to setup the certificate authority`
+  );
   seedConfigFiles();
 
   debug(`Generating a private key`);
-  generateKey(rootKeyPath);
+
+  generateKey(rootKeyPath, { password });
 
   debug(`Generating a CA certificate`);
-  openssl(`req -new -x509 -config "${ caSelfSignConfig }" -key "${ rootKeyPath }" -out "${ rootCertPath }"`);
+  openssl(
+    `req -new -x509 -config "${caSelfSignConfig}" -key "${rootKeyPath}" -out "${rootCertPath}" -passin pass:${password}`
+  );
 
   debug('Saving certificate authority credentials');
   await saveCertificateAuthorityCredentials(rootKeyPath, rootCertPath);
-
   debug(`Adding the root certificate authority to trust stores`);
   await currentPlatform.addToTrustStores(rootCertPath, options);
 }
@@ -66,12 +73,15 @@ function scrubOldInsecureVersions() {
     configDir = path.join(process.env.LOCALAPPDATA, 'devcert', 'config');
   } else {
     let uid = process.getuid && process.getuid();
-    let userHome = (isLinux && uid === 0) ? path.resolve('/usr/local/share') : require('os').homedir();
+    let userHome =
+      isLinux && uid === 0
+        ? path.resolve('/usr/local/share')
+        : require('os').homedir();
     configDir = path.join(userHome, '.config', 'devcert');
   }
 
   // Delete the root certificate keys, as well as the generated app certificates
-  debug(`Checking ${ configDir } for legacy files ...`);
+  debug(`Checking ${configDir} for legacy files ...`);
   [
     path.join(configDir, 'openssl.conf'),
     path.join(configDir, 'devcert-ca-root.key'),
@@ -80,7 +90,7 @@ function scrubOldInsecureVersions() {
     path.join(configDir, 'certs')
   ].forEach((filepath) => {
     if (exists(filepath)) {
-      debug(`Removing legacy file: ${ filepath }`)
+      debug(`Removing legacy file: ${filepath}`);
       rimraf(filepath);
     }
   });
@@ -111,7 +121,10 @@ export async function withCertificateAuthorityCredentials(cb: ({ caKeyPath, caCe
   rm(tmpCACertPath);
 }
 
-async function saveCertificateAuthorityCredentials(keypath: string, certpath: string) {
+async function saveCertificateAuthorityCredentials(
+  keypath: string,
+  certpath: string
+) {
   debug(`Saving devcert's certificate authority credentials`);
   let key = readFile(keypath, 'utf-8');
   let cert = readFile(certpath, 'utf-8');

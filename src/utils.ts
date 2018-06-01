@@ -4,23 +4,24 @@ import createDebug from 'debug';
 import path from 'path';
 import sudoPrompt from 'sudo-prompt';
 
-import {
-  configPath,
-} from './constants';
+import { configPath } from './constants';
 
 const debug = createDebug('devcert:util');
 
 export function openssl(cmd: string) {
-  return run(`openssl ${ cmd }`, {
+  return run(`openssl ${cmd}`, {
     stdio: 'pipe',
-    env: Object.assign({
-      RANDFILE: path.join(configPath('.rnd'))
-    }, process.env)
+    env: Object.assign(
+      {
+        RANDFILE: path.join(configPath('.rnd'))
+      },
+      process.env
+    )
   });
 }
 
 export function run(cmd: string, options: ExecSyncOptions = {}) {
-  debug(`exec: \`${ cmd }\``);
+  debug(`exec: \`${cmd}\``);
   return execSync(cmd, options);
 }
 
@@ -32,7 +33,9 @@ export function waitForUser() {
 }
 
 export function reportableError(message: string) {
-  return new Error(`${message} | This is a bug in devcert, please report the issue at https://github.com/davewasmer/devcert/issues`);
+  return new Error(
+    `${message} | This is a bug in devcert, please report the issue at https://github.com/davewasmer/devcert/issues`
+  );
 }
 
 export function mktmp() {
@@ -43,9 +46,17 @@ export function mktmp() {
 
 export function sudo(cmd: string): Promise<string | null> {
   return new Promise((resolve, reject) => {
-    sudoPrompt.exec(cmd, { name: 'devcert' }, (err: Error | null, stdout: string | null, stderr: string | null) => {
-      let error = err || (typeof stderr === 'string' && stderr.trim().length > 0 && new Error(stderr)) ;
-      error ? reject(error) : resolve(stdout);
-    });
+    sudoPrompt.exec(
+      cmd,
+      { name: 'devcert' },
+      (err: Error | null, stdout: string | null, stderr: string | null) => {
+        let error =
+          err ||
+          (typeof stderr === 'string' &&
+            stderr.trim().length > 0 &&
+            new Error(stderr));
+        error ? reject(error) : resolve(stdout);
+      }
+    );
   });
 }
