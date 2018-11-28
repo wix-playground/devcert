@@ -2,8 +2,9 @@
 
 import createDebug from 'debug';
 import { writeFileSync } from 'fs';
-import * as shelljs from 'shelljs';
-import yargs, { Arguments, Argv } from 'yargs';
+import { sync } from 'glob';
+import * as yargs from 'yargs';
+import { Arguments, Argv } from 'yargs';
 import { certificateFor } from './index';
 
 const debug = createDebug('devcert');
@@ -31,14 +32,13 @@ yargs
         skipHostsFile: argv.skipHostFile
       });
       if (argv.copyToYoshi) {
-        shelljs
-          .find('node_modules/yoshi/**/cert.pem')
+        const root = '{..,}/node_modules/yoshi';
+        sync(`${root}/**/cert.pem`)
           .forEach((filePath: string) => {
             debug(`Copied cert to ${filePath}`);
             writeFileSync(filePath, cert, { encoding: 'utf8' });
           });
-        shelljs
-          .find('node_modules/yoshi/**/key.pem')
+        sync(`${root}/**/key.pem`)
           .forEach((filePath: string) => {
             debug(`Copied key to ${filePath}`);
             writeFileSync(filePath, key, { encoding: 'utf8' });

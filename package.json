@@ -30,6 +30,9 @@
     "standard-version": "^4.3.0",
     "typescript": "^2.7.0"
   },
+  "peerDependencies": {
+    "yoshi": "^3.21.0"
+  },
   "dependencies": {
     "@types/shelljs": "^0.8.0",
     "@types/yargs": "^11.0.0",

@@ -14,6 +14,6 @@ export default class WindowsPlatform implements Platform {
     addDomainToHostFileIfMissing(domain: string): Promise<void>;
     readProtectedFile(filepath: string): Promise<string>;
     writeProtectedFile(filepath: string, contents: string): Promise<void>;
-    private encrypt;
-    private decrypt;
+    private encrypt(text, key);
+    private decrypt(encrypted, key);
 }

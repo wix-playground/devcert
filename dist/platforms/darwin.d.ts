@@ -16,6 +16,6 @@ export default class MacOSPlatform implements Platform {
     addDomainToHostFileIfMissing(domain: string): Promise<void>;
     readProtectedFile(filepath: string): Promise<string>;
     writeProtectedFile(filepath: string, contents: string): Promise<void>;
-    private isFirefoxInstalled;
-    private isNSSInstalled;
+    private isFirefoxInstalled();
+    private isNSSInstalled();
 }

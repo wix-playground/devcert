@@ -4,7 +4,7 @@ import { Options } from './index';
  * per-app certs.
  */
 export default function installCertificateAuthority(options?: Options): Promise<void>;
-export declare function withCertificateAuthorityCredentials(cb: ({ caKeyPath, caCertPath }: {
+export declare function withCertificateAuthorityCredentials(cb: ({caKeyPath, caCertPath}: {
     caKeyPath: string;
     caCertPath: string;
 }) => Promise<void> | void): Promise<void>;

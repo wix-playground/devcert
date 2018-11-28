@@ -7,7 +7,7 @@
       "target": "ES2016",
       "noImplicitAny": true,
       "sourceMap": false,
-      "importHelpers": true,
+      "importHelpers": false,
       "inlineSourceMap": true,
       "inlineSources": true,
       "outDir": "dist",

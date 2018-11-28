@@ -7,6 +7,6 @@ import { Options } from './index';
  * added to the OS/browser trust stores), they are trusted.
  */
 export default function generateDomainCertificate(domain: string, options?: Options): Promise<void>;
-export declare function generateKey(filename: string, { password }?: {
+export declare function generateKey(filename: string, {password}?: {
     password?: string;
 }): void;

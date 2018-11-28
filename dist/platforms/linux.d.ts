@@ -19,6 +19,6 @@ export default class LinuxPlatform implements Platform {
     addDomainToHostFileIfMissing(domain: string): Promise<void>;
     readProtectedFile(filepath: string): Promise<string>;
     writeProtectedFile(filepath: string, contents: string): Promise<void>;
-    private isFirefoxInstalled;
-    private isChromeInstalled;
+    private isFirefoxInstalled();
+    private isChromeInstalled();
 }
