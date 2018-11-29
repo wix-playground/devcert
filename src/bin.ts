@@ -32,7 +32,7 @@ yargs
         skipHostsFile: argv.skipHostFile
       });
       if (argv.copyToYoshi) {
-        const root = '{..,}/node_modules/yoshi';
+        const root = '{../node_modules,node_modules}/yoshi';
         sync(`${root}/**/cert.pem`)
           .forEach((filePath: string) => {
             debug(`Copied cert to ${filePath}`);
